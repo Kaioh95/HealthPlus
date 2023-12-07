@@ -14,7 +14,7 @@ public class Refund {
     /*@ nullable spec_public@*/ private final SimpleStringProperty bill = new SimpleStringProperty("");
     /*@ nullable spec_public @*/ private ImageView refund;
 
-    //@ public invariant patientID != null && date != null && billID != null && service != null && bill != null && refund != null;
+    //@ invariant patientID != null && date != null && billID != null && service != null && bill != null;
 
     /*
     public Refund() {
@@ -39,8 +39,7 @@ public class Refund {
     }
 
     //@ ensures \result != null;
-    //@ pure
-    public String getPatientID() {
+    public /*@ pure @*/ String getPatientID() {
         return patientID.get();
     }
 
@@ -51,8 +50,7 @@ public class Refund {
     }
 
     //@ ensures \result != null;
-    //@ pure
-    public String getDate() {
+    public /*@ pure @*/ String getDate() {
         return date.get();
     }
 
@@ -63,8 +61,7 @@ public class Refund {
     }
 
     //@ ensures \result != null;
-    //@ pure
-    public String getBillID() {
+    public /*@ pure @*/ String getBillID() {
         return billID.get();
     }
 
@@ -75,8 +72,7 @@ public class Refund {
     }
 
     //@ ensures \result != null;
-    //@ pure
-    public String getService() {
+    public /*@ pure @*/ String getService() {
         return service.get();
     }
 
@@ -87,8 +83,7 @@ public class Refund {
     }
 
     //@ ensures \result != null;
-    //@ pure
-    public String getBill() {
+    public /*@ pure @*/ String getBill() {
         return bill.get();
     }
 
@@ -99,8 +94,7 @@ public class Refund {
     }
 
     //@ ensures \result != null;
-    //@ pure
-    public ImageView getRefund() {
+    public /*@ pure @*/ ImageView getRefund() {
         return this.refund;
     }
 
