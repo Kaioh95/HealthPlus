@@ -26,17 +26,44 @@ public class User
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	
-	
+
+    //@ public invariant username != null && username.length() > 0;
+    //@ public invariant userID != null && userID.length() > 0;
+    //@ public invariant userType != null && userType.length() > 0;
+    //@ public invariant database != null && database.length() > 0;
+    //@ public invariant dbUsername != null && dbUsername.length() > 0;
+    //@ public invariant dbPassword != null && dbPassword.length() > 0;
+
+
+    //@ public invariant dbUsername.equals("");
+    //@ public invariant dbPassword.equals("");
+    //@ public invariant database.equals("");
+    //@ public invariant username.equals("");
+    //@ public invariant userID.equals("");
+    //@ public invariant userType.equals("");
 	public DatabaseOperator dbOperator;
 	public String username;
 	public String userID;
 	public String userType;
-        
+
         public String database = "";
         public String dbUsername = "";
         public String dbPassword = "";
-        
+    //@ public invariant username != null && username.length() > 0;
+    //@ public invariant userID != null && userID.length() > 0;
+    //@ public invariant userType != null && userType.length() > 0;
+    //@ public invariant database != null && database.length() > 0;
+    //@ public invariant dbUsername != null && dbUsername.length() > 0;
+    //@ public invariant dbPassword != null && dbPassword.length() > 0;
+
+    //@ ensures username != null && username.length() > 0;
+    //@ ensures userID != null && userID.length() > 0;
+    //@ ensures userType != null && userType.length() > 0;
+    //@ ensures database != null && database.length() > 0;
+    //@ ensures dbUsername != null && dbUsername.length() > 0;
+    //@ ensures dbPassword != null && dbPassword.length() > 0;
+    //@ ensures dbOperator != null;
+    //@ ensures \fresh(dbOperator);
         public User() throws IOException
 	{
             InputStream inputStream = null;
@@ -44,7 +71,7 @@ public class User
             try {
                 Properties prop = new Properties();
                 String propFileName = "config.properties";
-
+                //@ assert propFileName != null;
                 inputStream = getClass().getClassLoader().getResourceAsStream(propFileName);
 
                 if (inputStream != null) {
@@ -57,7 +84,9 @@ public class User
                 this.dbUsername = prop.getProperty("user");
                 this.dbPassword = prop.getProperty("password");
                 this.database = prop.getProperty("database");
-
+                //@ assert dbUsername != null && dbUsername.length() > 0;
+                //@ assert dbPassword != null && dbPassword.length() > 0;
+                //@ assert database != null && database.length() > 0;
                 System.out.println(dbUsername+" "+dbPassword +" "+database);
                 
             } catch (Exception e) {
@@ -67,15 +96,33 @@ public class User
                     inputStream.close();
                 }catch(Exception e){} 
             }
-            
+        //@ assert dbOperator != null;
+        //@ assert inputStream != null;
 		this.dbOperator = new DatabaseOperator();
 		try{
 			dbOperator.connect(dbUsername,dbPassword);
 			dbOperator.useDatabse(database);
                         
 		}catch(SQLException | ClassNotFoundException e){e.printStackTrace();}
+        //@ assert dbOperator != null;
+        //@ assert dbUsername != null && dbUsername.length() > 0;
+        //@ assert dbPassword != null && dbPassword.length() > 0;
+        //@ assert database != null && database.length() > 0;
 	}
-	
+
+    //@ requires username != null && username.length() > 0;
+    //@ ensures \fresh(this);
+    //@ ensures \fresh(dbOperator);
+    //@ ensures dbOperator != null;
+    //@ ensures dbUsername != null && dbUsername.length() > 0;
+    //@ ensures dbPassword != null && dbPassword.length() > 0;
+    //@ ensures database != null && database.length() > 0;
+    //@ ensures this.username != null && this.username.length() > 0;
+    //@ ensures userID != null && userID.length() > 0;
+    //@ ensures userType != null && userType.length() > 0;
+    //@ signals (FileNotFoundException) false;
+    //@ signals (SQLException e) true;
+    //@ signals (ClassNotFoundException e) true;
 	public User(String username)
 	{
             InputStream inputStream = null;
@@ -83,7 +130,7 @@ public class User
             try {
                 Properties prop = new Properties();
                 String propFileName = "config.properties";
-
+                //@ assert propFileName != null;
                 inputStream = getClass().getClassLoader().getResourceAsStream(propFileName);
 
                 if (inputStream != null) {
@@ -96,7 +143,9 @@ public class User
                 this.dbUsername = prop.getProperty("user");
                 this.dbPassword = prop.getProperty("password");
                 this.database = prop.getProperty("database");
-
+                //@ assert dbUsername != null && dbUsername.length() > 0;
+                //@ assert dbPassword != null && dbPassword.length() > 0;
+                //@ assert database != null && database.length() > 0;
                 System.out.println(dbUsername+" "+dbPassword +" "+database);
                 
             } catch (Exception e) {
@@ -107,8 +156,9 @@ public class User
                     inputStream.close();
                 }catch(Exception e){}    
             }
-            
-            
+
+            //@ assert dbOperator != null;
+            //@ assert inputStream != null;
             this.dbOperator = new DatabaseOperator();
             try{
                 dbOperator.connect(dbUsername,dbPassword);
@@ -118,13 +168,20 @@ public class User
                 this.userID = result.get(0).get(0);
                 this.userType = result.get(0).get(1);
 
+                //@ assert username != null && username.length() > 0;
+                //@ assert userID != null && userID.length() > 0;
+                //@ assert userType != null && userType.length() > 0;
+
                 //System.out.println(userID);
                 //System.out.println(userType);
 
             }catch(SQLException | ClassNotFoundException e){e.printStackTrace();}
 	}
-	
-	public String checkUser(String username, String password)
+
+    //@ requires username != null && password != null;
+    //@ ensures \result != null;
+    //@ ensures (\result.equals("false") || \result.equals("admin") || \result.equals("user"));
+    public String checkUser(String username, String password)
         {
             DatabaseOperator tmpOperator = new DatabaseOperator();
             String access = "false";

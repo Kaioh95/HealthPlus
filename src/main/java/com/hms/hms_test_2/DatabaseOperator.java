@@ -91,25 +91,31 @@ public class DatabaseOperator
 	}};
 	
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	
-	
-	
-    public static String dbClassName = "org.mariadb.jdbc.Driver";
-    public static String CONNECTION = "jdbc:mysql://127.0.0.1/";
-    
-    public static Connection c;
-    
-    private static String currentDatabaseName;
-    
+
+
+
+	//@ public invariant dbClassName != null && CONNECTION != null && c != null;
+
+	public static /*@ non_null @*/ String dbClassName = "org.mariadb.jdbc.Driver";
+    public static /*@ non_null @*/ String CONNECTION = "jdbc:mysql://127.0.0.1/";
+
+    public static /*@ non_null @*/  Connection c;
+
+	private static /*@ non_null @*/ String currentDatabaseName;
+
     public DatabaseOperator()
     { }
-    
-    public DatabaseOperator(String dbClassName, String connection)
+	//@ requires dbClassName != null && connection != null;
+	//@ ensures dbClassName.equals(this.dbClassName) && connection.equals(this.CONNECTION);
+	public DatabaseOperator(String dbClassName, String connection)
     {
 		this.dbClassName = dbClassName;
 		this.CONNECTION = connection;
 	}
-	
+	//@ requires userName != null && password != null;
+	//@ ensures \fresh(c);
+	//@ signals (ClassNotFoundException e) false;
+	//@ signals (SQLException e) false;
 	public void connect(String userName, String password) throws ClassNotFoundException,SQLException
 	{
 		Class.forName(dbClassName);
@@ -120,12 +126,18 @@ public class DatabaseOperator
         // Try to connect
         this.c = DriverManager.getConnection(CONNECTION,p);
 	}
-	
+	//@ requires c != null;
+	//@ ensures c.isClosed();
+	//@ signals (ClassNotFoundException e) false;
+	//@ signals (SQLException e) false;
 	public void close() throws ClassNotFoundException,SQLException
 	{
 		c.close();
 	}
-	
+	//@ requires databaseName != null;
+	//@ ensures \fresh(c);
+	//@ signals (ClassNotFoundException e) false;
+	//@ signals (SQLException e) false;
 	public void createDatabase(String databaseName) throws ClassNotFoundException,SQLException
 	{
 		
@@ -145,19 +157,23 @@ public class DatabaseOperator
 
         stmt.close();
 	}
-	
-	
+
+	//@ requires c != null;
+	//@ ensures \result != null;
+	//@ signals (ClassNotFoundException e) false;
+	//@ signals (SQLException e) false;
 	public ArrayList<String> showDatabases() throws ClassNotFoundException,SQLException
 	{
 		System.out.println("Retreiving data from the Database...\n");
-		
+
 		int i = 1;
 		String sql = "SHOW DATABASES;";
 		PreparedStatement stmt = c.prepareStatement(sql);
 		ResultSet rs = stmt.executeQuery(sql);
 		ArrayList<String> dbNames = new ArrayList<String>();
-		
-		
+
+
+		//@ maintaining (\forall int j; 0 <= j && j < dbNames.size(); dbNames.get(j) != null);
 		while(rs.next())
 		{
 			//Retrieve by column name
@@ -166,12 +182,12 @@ public class DatabaseOperator
 			//Display values
 			System.out.print(i+" " + dbName+"\n");i++;
 		}
-		
+
 		rs.close();
         stmt.close();
         return dbNames;
 	}
-	
+
 	public void useDatabse(String databaseName) throws ClassNotFoundException,SQLException
 	{
 		String sql = "USE " + databaseName + ";";
@@ -303,12 +319,15 @@ public class DatabaseOperator
 	public boolean addTableRow(String table,String tableData) throws ClassNotFoundException,SQLException
 	{
 		boolean result = true;
+		//@ ghost String originalSql = "SELECT * FROM " + table + ";";
 		String sql = "SELECT * FROM " + table + ";";
 		PreparedStatement stmt = c.prepareStatement(sql);
 		ResultSet rs = stmt.executeQuery(sql);
 		ResultSetMetaData rsmd = rs.getMetaData();
 		int noOfColumns = rsmd.getColumnCount();
 		String columnHeaders = "";
+		//@ maintaining noOfColumns >= 0;
+		//@ maintaining columnHeaders != null;
 		for (int i = 0; i < noOfColumns; i++)
 		{
 			columnHeaders += "?";
@@ -318,13 +337,15 @@ public class DatabaseOperator
 		
 		String[] tableDataSplit = tableData.split(",");
 		//System.out.println(tableData);
-                
+		//@ ghost String insertSql = "INSERT INTO " + table + " VALUES (" + columnHeaders + ")";
 		sql = "INSERT INTO "+ table +" VALUES ("+ columnHeaders +")";
 		stmt = c.prepareStatement(sql);
-		
+
+		//@ maintaining tableDataSplit.length == noOfColumns;
 		for(int i = 0; i < noOfColumns; i++)
 		{
                         //System.out.println(tableDataSplit[i]);
+			//@ assert tableDataSplit[i] != null;
 			stmt.setString(i+1, tableDataSplit[i]); 
 		}
 		
@@ -353,12 +374,14 @@ public class DatabaseOperator
 
 		try
 		{
+
 			stmt.executeUpdate();
-			System.out.println("Deleted records from the table...");	
+			System.out.println("Deleted records from the table...");
 		}catch(SQLException e)
 		{
 			System.out.println("Error in Deleting records from the table...");
 		}
+
         stmt.close();
 	}
 	
