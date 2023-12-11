@@ -227,8 +227,12 @@ public class User
             }catch(ClassNotFoundException | SQLException e){}	
             
             return result;
-        } 
-        
+        }
+        //@ requires sender != null && receiver != null && subject != null && message != null;
+        //@ requires sender.length() > 0 && receiver.length() > 0 && subject.length() > 0 && message.length() > 0;
+        //@ ensures \result == true || \result == false;
+        //@ signals (ClassNotFoundException e) false;
+        //@ signals (SQLException e) false;
         public boolean sendMessage(String sender, String receiver,String subject, String message)
 	{	
             
@@ -241,19 +245,28 @@ public class User
 
                 char[] tmpID = messageID.toCharArray();
                 int i = 3;
+                //@ maintaining i >= 3 && i <= messageID.length();
+                //@ maintaining (\forall int k; 3 <= k && k < i; tmpID[k] == '0');
+                //@ decreasing messageID.length() - i;
                 for (i = 3; i < messageID.length(); i++)
                 {
                         if  (tmpID[i] != '0') break; 
                 } 
 
                 String tmpID2 = Integer.toString(Integer.parseInt(messageID.substring(i,messageID.length())) + 1 );
+                // Padding zeros to the new numeric part
+                //@ maintaining tmpID2.length() <= 5;
+                //@ decreasing 5 - tmpID2.length();
                 while(tmpID2.length() < 5)
                 {
                         tmpID2 = "0" + tmpID2;
                 }
                 messID = "msg" + tmpID2;
                 
-            }catch(Exception e){e.printStackTrace(); messID = "msg00001";}
+            }catch(Exception e){
+                //@ assert e != null;
+                e.printStackTrace(); messID = "msg00001";
+                }
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////
             
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -270,7 +283,9 @@ public class User
 
                     result = dbOperator.customInsertion(sql);
 
-            }catch(ClassNotFoundException | SQLException e){e.printStackTrace();}	
+            }catch(ClassNotFoundException | SQLException e){
+                //@ assert e != null;
+                e.printStackTrace();}	
             //System.out.println(data);
             return result;
 	}
@@ -424,7 +439,10 @@ public class User
             System.out.println(data);
             return data;
 	}
-        
+    //@ requires msgID != null && msgID.length() > 0;
+    //@ ensures \result == true || \result == false;
+    //@ signals (ClassNotFoundException e) false;
+    //@ signals (SQLException e) false;
         public boolean setMessageRead(String msgID)
         {
              String sql =   "UPDATE user_message "+
@@ -440,8 +458,11 @@ public class User
             }catch(ClassNotFoundException | SQLException e){e.printStackTrace();}	
             //System.out.println(data);
             return result;
-        }        
-        
+        }
+    //@ requires msgid != null && msgid.length() > 0;
+    //@ ensures \result != null;
+    //@ signals (ClassNotFoundException e) false;
+    //@ signals (SQLException e) false;
         public String getMessageSenderInfo(String msgid)
 	{	
             String sql =    "SELECT "+
